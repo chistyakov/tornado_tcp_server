@@ -1,3 +1,5 @@
+import os
+
 from tornado.ioloop import IOLoop
 
 from core.online_statistics import OnlineStatistics
@@ -10,10 +12,12 @@ def main():
     online_statistics = OnlineStatistics()
 
     message_server = MessageServer(observers, online_statistics)
-    message_server.listen(8888)
+    message_port = int(os.environ.get("MESSAGE_PORT", 8888))
+    message_server.listen(message_port)
 
     observe_server = ObserveServer(observers, online_statistics)
-    observe_server.listen(8889)
+    observe_port = int(os.environ.get("OBSERVE_PORT", 8889))
+    observe_server.listen(observe_port)
 
     IOLoop.current().start()
 
