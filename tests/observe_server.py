@@ -1,6 +1,7 @@
 from tornado import gen
 from tornado.testing import gen_test
 
+from core.utils import decode_ascii
 from tests.base import BaseTestCase
 
 
@@ -27,7 +28,7 @@ class ObserveServerOnConnectTestCase(BaseTestCase):
         observer = await self.connect_observer()
 
         result = await observer.read_until(b"\r\n")
-        self.assertRegex(result.decode("ascii"), "[foo] 1 | IDLE | {\d+}\r\n")
+        self.assertRegex(decode_ascii(result), "[foo] 1 | IDLE | {\d+}\r\n")
 
     @gen_test
     async def test_multiple_online_statistics_on_connect(self):
@@ -39,10 +40,10 @@ class ObserveServerOnConnectTestCase(BaseTestCase):
         observer = await self.connect_observer()
 
         result = await observer.read_until(b"\r\n")
-        self.assertRegex(result.decode("ascii"), "[foo] 257 | IDLE | {\d+}\r\n")
+        self.assertRegex(decode_ascii(result), "[foo] 257 | IDLE | {\d+}\r\n")
 
         result = await observer.read_until(b"\r\n")
-        self.assertRegex(result.decode("ascii"), "[bar] 65535 | ACTIVE | {\d+}\r\n")
+        self.assertRegex(decode_ascii(result), "[bar] 65535 | ACTIVE | {\d+}\r\n")
 
     @gen_test
     async def test_online_statistics_contains_timedelta(self):
@@ -58,4 +59,4 @@ class ObserveServerOnConnectTestCase(BaseTestCase):
 
 
 def extract_timedelta(result):
-    return int(result.decode("ascii").rpartition("|")[-1].lstrip())
+    return int(decode_ascii(result).rpartition("|")[-1].lstrip())

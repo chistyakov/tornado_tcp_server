@@ -27,7 +27,7 @@ def bytes_to_ascii(bytes_obj: bytes) -> str:
     >>> bytes_to_ascii(b'\\x00' + b'spamfoo')
     'spamfoo'
     """
-    return bytes_obj.lstrip(b"\x00").decode("ascii", "ignore")
+    return decode_ascii(bytes_obj.lstrip(b"\x00"))
 
 
 def ascii_to_bytes(str_obj: str, length: int) -> bytes:
@@ -43,7 +43,7 @@ def ascii_to_bytes(str_obj: str, length: int) -> bytes:
     """
     if len(str_obj) > length:
         raise ValueError(f"ascii string {str_obj} greater then length limit {length}")
-    return str_obj.encode("ascii", "ignore").rjust(length, b"\x00")
+    return encode_ascii(str_obj).rjust(length, b"\x00")
 
 
 def xor(bytes_obj: bytes) -> bytes:
@@ -59,3 +59,11 @@ def xor(bytes_obj: bytes) -> bytes:
 
 def now_in_ms() -> int:
     return round(time.time() * 1000)
+
+
+def encode_ascii(str_obj: str) -> bytes:
+    return str_obj.encode("ascii", "ignore")
+
+
+def decode_ascii(bytes_obj: bytes) -> str:
+    return bytes_obj.decode("ascii", "ignore")
