@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from core.primitives import OutboxMessage, InboxMessage, SOURCE_STATUSES
 from core.utils import xor, ascii_to_bytes, int_to_bytes
 
@@ -53,10 +55,19 @@ def marshall_fields(message: InboxMessage) -> bytes:
     return b"".join([fields_count, *fields_bytes])
 
 
-def marshall_source_status(message) -> bytes:
+def marshall_source_status(message: InboxMessage) -> bytes:
     try:
         return next(
-            key for key, value in SOURCE_STATUSES.items() if value == message.source_status
+            key
+            for key, value in SOURCE_STATUSES.items()
+            if value == message.source_status
         )
     except StopIteration:
         raise ValueError(f"Invalid status {message.source_status}")
+
+
+def message_as_rows(message: InboxMessage) -> Iterable[bytes]:
+    for field_name, field_value in message.fields:
+        yield f"[{message.source_name}] {field_name} | {field_value}\r\n".encode(
+            "ascii", "ignore"
+        )

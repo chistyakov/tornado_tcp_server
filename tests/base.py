@@ -5,7 +5,6 @@ from tornado.testing import bind_unused_port, AsyncTestCase
 
 from core.marshall import marshal_inbox
 from core.primitives import InboxMessage
-from core.utils import int_to_bytes, ascii_to_bytes, xor
 from handlers.message_server import MessageServer
 from handlers.observe_server import ObserveServer
 
@@ -13,8 +12,9 @@ from handlers.observe_server import ObserveServer
 class BaseTestCase(AsyncTestCase):
     def setUp(self):
         super().setUp()
-        self.message_server = MessageServerTestServer()
-        self.observe_server = ObserveServerTestServer()
+        observers = set()
+        self.message_server = MessageServerTestServer(observers=observers)
+        self.observe_server = ObserveServerTestServer(observers=observers)
 
     async def connect_messenger(self):
         return await self.message_server.connect()
@@ -32,8 +32,8 @@ class BaseTestServer:
     server_factory = NotImplemented
     client_factory = IOStream
 
-    def __init__(self):
-        self.server = self.server_factory()
+    def __init__(self, **kwargs):
+        self.server = self.server_factory(**kwargs)
         sock, self.port = bind_unused_port()
         self.server.add_socket(sock)
         self.clients = []
@@ -52,7 +52,6 @@ class BaseTestServer:
 
 class MessageServerIOStream(IOStream):
     async def send_message(self, message_number, source_name, source_status, fields):
-
         message = marshal_inbox(
             InboxMessage(
                 b"\x01", message_number, source_name, source_status, None, fields

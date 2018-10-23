@@ -9,30 +9,30 @@ logger = logging.getLogger(__name__)
 
 
 async def unmarshall_inbox(stream) -> InboxMessage:
-    header = await stream.read_bytes(1)
-    message_number = await stream.read_bytes(2)
-    source_name = await stream.read_bytes(8)
-    source_status = await stream.read_bytes(1)
+    header_bytes = await stream.read_bytes(1)
+    message_number_bytes = await stream.read_bytes(2)
+    source_name_bytes = await stream.read_bytes(8)
+    source_status_bytes = await stream.read_bytes(1)
     fields_count = await stream.read_bytes(1)
     fields_count_int = bytes_to_int(fields_count)
-    fields = await stream.read_bytes(fields_count_int * 12)
-    source_xor = await stream.read_bytes(1)
+    fields_bytes = await stream.read_bytes(fields_count_int * 12)
+    source_xor_bytes = await stream.read_bytes(1)
 
     message = InboxMessage(
-        header=unmarshall_header(header),
-        message_number=unmarshall_message_number(message_number),
-        source_name=source_name,
-        source_status=unmarshall_source_status(source_status),
+        header=unmarshall_header(header_bytes),
+        message_number=unmarshall_message_number(message_number_bytes),
+        source_name=unmarshall_source_name(source_name_bytes),
+        source_status=unmarshall_source_status(source_status_bytes),
         fields_count=fields_count_int,
-        fields=unmarshall_fields(fields_count_int, fields),
-        source_xor=source_xor,
+        fields=unmarshall_fields(fields_count_int, fields_bytes),
+        source_xor=source_xor_bytes,
         raw_payload=(
-            header
-            + message_number
-            + source_name
-            + source_status
+            header_bytes
+            + message_number_bytes
+            + source_name_bytes
+            + source_status_bytes
             + fields_count
-            + fields
+            + fields_bytes
         ),
     )
 
@@ -48,6 +48,10 @@ def unmarshall_header(bytes_obj: bytes) -> bytes:
 
 def unmarshall_message_number(bytes_obj: bytes) -> int:
     return bytes_to_int(bytes_obj)
+
+
+def unmarshall_source_name(bytes_obj: bytes) -> str:
+    return bytes_to_ascii(bytes_obj)
 
 
 def unmarshall_source_status(bytes_obj: bytes) -> str:
