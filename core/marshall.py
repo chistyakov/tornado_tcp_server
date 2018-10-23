@@ -1,7 +1,12 @@
 from typing import Iterable
 
-from core.primitives import OutboxMessage, InboxMessage, SOURCE_STATUSES
-from core.utils import xor, ascii_to_bytes, int_to_bytes
+from core.primitives import (
+    OutboxMessage,
+    InboxMessage,
+    SOURCE_STATUSES,
+    OnlineSourceStatistics,
+)
+from core.utils import xor, ascii_to_bytes, int_to_bytes, now_in_ms
 
 
 def marshall_outbox(message: OutboxMessage) -> bytes:
@@ -66,8 +71,19 @@ def marshall_source_status(message: InboxMessage) -> bytes:
         raise ValueError(f"Invalid status {message.source_status}")
 
 
-def message_as_rows(message: InboxMessage) -> Iterable[bytes]:
+def marshall_message_as_rows(message: InboxMessage) -> Iterable[bytes]:
     for field_name, field_value in message.fields:
         yield f"[{message.source_name}] {field_name} | {field_value}\r\n".encode(
             "ascii", "ignore"
         )
+
+
+def marshall_online_statistics(stat: OnlineSourceStatistics) -> bytes:
+    time_delta_in_ms = now_in_ms() - stat.last_message_timestamp_in_ms
+    return (
+        f"[{stat.name}] "
+        f"{stat.last_message_number} | "
+        f"{stat.status} | "
+        f"{time_delta_in_ms}"
+        "\r\n"
+    ).encode("ascii", "ignore")

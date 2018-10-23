@@ -21,3 +21,11 @@ class OutboxMessage:
 
 
 SOURCE_STATUSES = {b"\x01": "IDLE", b"\x02": "ACTIVE", b"\x03": "RECHARGE"}
+
+
+@dataclass
+class OnlineSourceStatistics:
+    name: str
+    status: str
+    last_message_number: int
+    last_message_timestamp_in_ms: int

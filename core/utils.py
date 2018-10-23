@@ -1,3 +1,4 @@
+import time
 from functools import reduce
 
 
@@ -54,3 +55,7 @@ def xor(bytes_obj: bytes) -> bytes:
         raise ValueError
     head, *tail = bytes_obj
     return bytes([reduce(lambda x, y: x ^ y, tail, head)])
+
+
+def now_in_ms() -> int:
+    return round(time.time() * 1000)
