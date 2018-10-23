@@ -32,8 +32,7 @@ class MessageServer(TCPServer):
         except ValueError:
             logger.exception("Error on unmarshalling")
             outbox_message = OutboxMessage(b"\x12", 0)
-        bytes_obj = marshall_outbox(outbox_message)
-        await stream.write(bytes_obj)
+        await stream.write(marshall_outbox(outbox_message))
 
     async def on_valid_message(self, message: InboxMessage):
         self.sources_statistics[message.source_name] = SourceStatistics(
