@@ -1,6 +1,6 @@
 from typing import List
 
-from core.primitives import InputMessage
+from core.primitives import InboxMessage, SOURCE_STATUSES
 from core.utils import bytes_to_int, bytes_to_ascii, xor
 
 import logging
@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-async def unmarshall_message(stream) -> InputMessage:
+async def unmarshall_inbox(stream) -> InboxMessage:
     header = await stream.read_bytes(1)
     message_number = await stream.read_bytes(2)
     source_name = await stream.read_bytes(8)
@@ -18,7 +18,7 @@ async def unmarshall_message(stream) -> InputMessage:
     fields = await stream.read_bytes(fields_count_int * 12)
     source_xor = await stream.read_bytes(1)
 
-    message = InputMessage(
+    message = InboxMessage(
         header=unmarshall_header(header),
         message_number=unmarshall_message_number(message_number),
         source_name=source_name,
@@ -26,7 +26,7 @@ async def unmarshall_message(stream) -> InputMessage:
         fields_count=fields_count_int,
         fields=unmarshall_fields(fields_count_int, fields),
         source_xor=source_xor,
-        raw=(
+        raw_payload=(
             header
             + message_number
             + source_name
@@ -52,7 +52,7 @@ def unmarshall_message_number(bytes_obj: bytes) -> int:
 
 def unmarshall_source_status(bytes_obj: bytes) -> str:
     try:
-        return {b"\x01": "IDLE", b"\x02": "ACTIVE", b"\x03": "RECHARGE"}[bytes_obj]
+        return SOURCE_STATUSES[bytes_obj]
     except KeyError:
         raise ValueError(f"Invalid status {bytes_obj}")
 
@@ -76,8 +76,8 @@ def unmarshall_fields(fields_count: int, bytes_obj: bytes) -> List[tuple]:
     return result
 
 
-def validate_xor(message: InputMessage) -> None:
+def validate_xor(message: InboxMessage) -> None:
     expected_xor = message.source_xor
-    actual_xor = xor(message.raw)
+    actual_xor = xor(message.raw_payload)
     if actual_xor != expected_xor:
         raise ValueError(f"Invalid xor {actual_xor} expected: {expected_xor}")

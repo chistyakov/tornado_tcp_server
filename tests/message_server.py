@@ -6,7 +6,7 @@ from tests.base import BaseTestCase
 class MessageServerValidInputTestCase(BaseTestCase):
     @gen_test
     async def test_message_1_field(self):
-        client = await self.connect()
+        client = await self.connect_messenger()
         await client.write(
             bytes(
                 [
@@ -23,12 +23,18 @@ class MessageServerValidInputTestCase(BaseTestCase):
         )
         result = await client.read_bytes(4)
         self.assertEqual(
-            result, bytes([0x11, 0x00, 0x01, 0x10])  # header  # message number  # xor
+            result, bytes(
+                [
+                    0x11,  # header
+                    0x00, 0x01,  # message number
+                    0x10  # xor
+                ]
+            )
         )
 
     @gen_test
     async def test_message_0_fields(self):
-        client = await self.connect()
+        client = await self.connect_messenger()
         await client.write(
             bytes(
                 [
@@ -49,7 +55,7 @@ class MessageServerValidInputTestCase(BaseTestCase):
 
     @gen_test
     async def test_message_2_fields(self):
-        client = await self.connect()
+        client = await self.connect_messenger()
         await client.write(
             bytes(
                 [
@@ -79,7 +85,7 @@ class MessageServerValidInputTestCase(BaseTestCase):
 class MessageServerInvalidInputTestCase(BaseTestCase):
     @gen_test
     async def test_invalid_header(self):
-        client = await self.connect()
+        client = await self.connect_messenger()
         await client.write(
             bytes(
                 [
@@ -105,7 +111,7 @@ class MessageServerInvalidInputTestCase(BaseTestCase):
 
     @gen_test
     async def test_invalid_source_status(self):
-        client = await self.connect()
+        client = await self.connect_messenger()
         await client.write(
             bytes(
                 [
@@ -131,7 +137,7 @@ class MessageServerInvalidInputTestCase(BaseTestCase):
 
     @gen_test
     async def test_invalid_source_xor(self):
-        client = await self.connect()
+        client = await self.connect_messenger()
         await client.write(
             bytes(
                 [

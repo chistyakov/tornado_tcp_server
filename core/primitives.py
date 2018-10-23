@@ -1,20 +1,23 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 
 @dataclass
-class InputMessage:
+class InboxMessage:
     header: bytes
     message_number: int
     source_name: str
     source_status: str
-    fields_count: int
+    fields_count: Optional[int]
     fields: List[tuple]
-    source_xor: bytes
-    raw: bytes
+    source_xor: bytes = None
+    raw_payload: bytes = None
 
 
 @dataclass
-class OutputMessage:
+class OutboxMessage:
     header: bytes
     message_number: int
+
+
+SOURCE_STATUSES = {b"\x01": "IDLE", b"\x02": "ACTIVE", b"\x03": "RECHARGE"}
