@@ -1,1 +1,5 @@
-from tests.echo import EchoTestCase
+import logging
+
+from tests.message_server import *
+
+logging.basicConfig(level=logging.DEBUG)

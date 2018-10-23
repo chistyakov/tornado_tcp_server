@@ -1,11 +1,11 @@
 from tornado.ioloop import IOLoop
 
-from handlers.echo import EchoServer
+from handlers.message_server import MessageServer
 
 
 def main():
-    echo_server = EchoServer()
-    echo_server.listen(8888)
+    message_server = MessageServer()
+    message_server.listen(8888)
     IOLoop.current().start()
 
 
