@@ -24,7 +24,7 @@ SOURCE_STATUSES = {b"\x01": "IDLE", b"\x02": "ACTIVE", b"\x03": "RECHARGE"}
 
 
 @dataclass
-class OnlineSourceStatistics:
+class SourceStatistics:
     name: str
     status: str
     last_message_number: int

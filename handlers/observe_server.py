@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class ObserveServer(TCPServer):
-    def __init__(self, observers, online_statistics, **kwargs):
+    def __init__(self, observers, sources_statistics, **kwargs):
         super().__init__(**kwargs)
         self.observers = observers
-        self.online_statistics = online_statistics
+        self.online_statistics = sources_statistics
 
     async def handle_stream(self, stream, address):
         await self.on_connect(stream)

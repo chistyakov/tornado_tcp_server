@@ -4,7 +4,7 @@ from tornado.iostream import IOStream
 from tornado.testing import bind_unused_port, AsyncTestCase
 
 from core.marshall import marshal_inbox
-from core.online_statistics import OnlineStatistics
+from core.statistics import SourceStatisticsRegistry
 from core.primitives import InboxMessage
 from handlers.message_server import MessageServer
 from handlers.observe_server import ObserveServer
@@ -14,7 +14,7 @@ class BaseTestCase(AsyncTestCase):
     def setUp(self):
         super().setUp()
         observers = set()
-        online_statistics = OnlineStatistics()
+        online_statistics = SourceStatisticsRegistry()
         self.message_server = MessageServerTestServer(
             observers=observers, online_statistics=online_statistics
         )

@@ -4,7 +4,7 @@ from core.primitives import (
     OutboxMessage,
     InboxMessage,
     SOURCE_STATUSES,
-    OnlineSourceStatistics,
+    SourceStatistics,
 )
 from core.utils import xor, ascii_to_bytes, int_to_bytes, now_in_ms, encode_ascii
 
@@ -15,7 +15,7 @@ def marshall_outbox(message: OutboxMessage) -> bytes:
     return bytes_obj
 
 
-def marshal_inbox(message: InboxMessage):
+def marshal_inbox(message: InboxMessage) -> bytes:
     if message.raw_payload is None:
         payload = b"".join(
             [
@@ -76,7 +76,7 @@ def marshall_message_as_rows(message: InboxMessage) -> Iterable[bytes]:
         yield encode_ascii(f"[{message.source_name}] {field_name} | {field_value}\r\n")
 
 
-def marshall_online_statistics(stat: OnlineSourceStatistics) -> bytes:
+def marshall_online_statistics(stat: SourceStatistics) -> bytes:
     time_delta_in_ms = now_in_ms() - stat.last_message_timestamp_in_ms
     return encode_ascii(
         f"[{stat.name}] "

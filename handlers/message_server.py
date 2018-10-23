@@ -4,7 +4,7 @@ from tornado.iostream import StreamClosedError
 from tornado.tcpserver import TCPServer
 
 from core.marshall import marshall_outbox
-from core.primitives import OutboxMessage, InboxMessage, OnlineSourceStatistics
+from core.primitives import OutboxMessage, InboxMessage, SourceStatistics
 from core.unmarshall import unmarshall_inbox
 from core.utils import now_in_ms
 
@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class MessageServer(TCPServer):
-    def __init__(self, observers, online_statistics, **kwargs):
+    def __init__(self, observers, sources_statistics, **kwargs):
         super().__init__(**kwargs)
         self.observers = observers
-        self.online_statistics = online_statistics
+        self.sources_statistics = sources_statistics
 
     async def handle_stream(self, stream, address):
         while True:
@@ -36,7 +36,7 @@ class MessageServer(TCPServer):
         await stream.write(bytes_obj)
 
     async def on_valid_message(self, message: InboxMessage):
-        self.online_statistics[message.source_name] = OnlineSourceStatistics(
+        self.sources_statistics[message.source_name] = SourceStatistics(
             message.source_name,
             message.source_status,
             message.message_number,
