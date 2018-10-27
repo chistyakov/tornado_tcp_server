@@ -14,12 +14,12 @@ class BaseTestCase(AsyncTestCase):
     def setUp(self):
         super().setUp()
         observers = set()
-        online_statistics = SourceStatisticsRegistry()
+        sources_statistics = SourceStatisticsRegistry()
         self.message_server = MessageServerTestServer(
-            observers=observers, online_statistics=online_statistics
+            observers=observers, sources_statistics=sources_statistics
         )
         self.observe_server = ObserveServerTestServer(
-            observers=observers, online_statistics=online_statistics
+            observers=observers, sources_statistics=sources_statistics
         )
 
     async def connect_messenger(self):
