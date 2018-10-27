@@ -1,7 +1,8 @@
+import functools
 import socket
 
 from tornado.iostream import IOStream
-from tornado.testing import bind_unused_port, AsyncTestCase
+from tornado.testing import bind_unused_port, AsyncTestCase, gen_test
 
 from core.marshall import marshal_inbox
 from core.statistics import SourceStatisticsRegistry
@@ -14,12 +15,12 @@ class BaseTestCase(AsyncTestCase):
     def setUp(self):
         super().setUp()
         observers = set()
-        online_statistics = SourceStatisticsRegistry()
+        sources_statistics = SourceStatisticsRegistry()
         self.message_server = MessageServerTestServer(
-            observers=observers, online_statistics=online_statistics
+            observers=observers, sources_statistics=sources_statistics
         )
         self.observe_server = ObserveServerTestServer(
-            observers=observers, online_statistics=online_statistics
+            observers=observers, sources_statistics=sources_statistics
         )
 
     async def connect_messenger(self):
@@ -28,10 +29,9 @@ class BaseTestCase(AsyncTestCase):
     async def connect_observer(self):
         return await self.observe_server.connect()
 
-    def tearDown(self):
+    def close_fixtures(self):
         self.message_server.close()
         self.observe_server.close()
-        super().tearDown()
 
 
 class BaseTestServer:
@@ -73,3 +73,19 @@ class MessageServerTestServer(BaseTestServer):
 
 class ObserveServerTestServer(BaseTestServer):
     server_factory = ObserveServer
+
+
+def safe_gen_test(f):
+    f = closing_gen(f)
+    f = gen_test(f)
+    return f
+
+
+def closing_gen(f):
+    @functools.wraps(f)
+    def wrapper(self, *args, **kwargs):
+        try:
+            yield from f(self, *args, **kwargs)
+        finally:
+            self.close_fixtures()
+    return wrapper
