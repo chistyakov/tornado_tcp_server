@@ -1,3 +1,4 @@
+import logging
 import os
 
 from tornado.ioloop import IOLoop
@@ -8,6 +9,8 @@ from handlers.observe_server import ObserveServer
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
+
     observers = set()
     sources_statistics = SourceStatisticsRegistry()
 

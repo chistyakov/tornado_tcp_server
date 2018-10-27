@@ -65,10 +65,12 @@ def unmarshall_fields(fields_count: int, bytes_obj: bytes) -> List[tuple]:
     """
     >>> unmarshall_fields(0, b'')
     []
-    >>> unmarshall_fields(1, b'\\x00' + b'spamfoo' + b'\\x00\\x00\\x00\\x01')
+    >>> unmarshall_fields(1, b'\\x00spamfoo' + b'\\x00\\x00\\x00\\x01')
     [('spamfoo', 1)]
-    >>> unmarshall_fields(2, b'\\x00' + b'spamfoo' + b'\\x00\\x00\\x00\\x01' + b'abcdefgh' + b'\\x00\\x00\\x00\\x10')
+    >>> unmarshall_fields(2, b'\\x00spamfoo' + b'\\x00\\x00\\x00\\x01' + b'abcdefgh' + b'\\x00\\x00\\x00\\x10')
     [('spamfoo', 1), ('abcdefgh', 16)]
+    >>> unmarshall_fields(2, b'\\x00\\x00\\x00\\x00\\x00foo' + b'\\x00\\x00\\x00\\x01' + b'abcdefgh' + b'\\x00\\x00\\x00\\x10')
+    [('foo', 1), ('abcdefgh', 16)]
     """
     result = []
     for i in range(fields_count):

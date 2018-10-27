@@ -1,13 +1,11 @@
-from tornado.testing import gen_test
-
-from tests.base import BaseTestCase
+from tests.base import BaseTestCase, safe_gen_test
 
 
 class MessageServerValidInputTestCase(BaseTestCase):
-    @gen_test
-    async def test_message_1_field(self):
-        client = await self.connect_messenger()
-        await client.write(
+    @safe_gen_test
+    def test_message_1_field(self):
+        client = yield self.connect_messenger()
+        yield client.write(
             bytes(
                 [
                     0x01,  # header
@@ -21,7 +19,7 @@ class MessageServerValidInputTestCase(BaseTestCase):
                 ]
             )
         )
-        result = await client.read_bytes(4)
+        result = yield client.read_bytes(4)
         self.assertEqual(
             result, bytes(
                 [
@@ -32,10 +30,10 @@ class MessageServerValidInputTestCase(BaseTestCase):
             )
         )
 
-    @gen_test
-    async def test_message_0_fields(self):
-        client = await self.connect_messenger()
-        await client.write(
+    @safe_gen_test
+    def test_message_0_fields(self):
+        client = yield self.connect_messenger()
+        yield client.write(
             bytes(
                 [
                     0x01,  # header
@@ -48,15 +46,15 @@ class MessageServerValidInputTestCase(BaseTestCase):
                 ]
             )
         )
-        result = await client.read_bytes(4)
+        result = yield client.read_bytes(4)
         self.assertEqual(
             result, bytes([0x11, 0x00, 0x10, 0x01])  # header  # message number  # xor
         )
 
-    @gen_test
-    async def test_message_2_fields(self):
-        client = await self.connect_messenger()
-        await client.write(
+    @safe_gen_test
+    def test_message_2_fields(self):
+        client = yield self.connect_messenger()
+        yield client.write(
             bytes(
                 [
                     0x01,  # header
@@ -72,7 +70,7 @@ class MessageServerValidInputTestCase(BaseTestCase):
                 ]
             )
         )
-        result = await client.read_bytes(4)
+        result = yield client.read_bytes(4)
         self.assertEqual(
             result, bytes([
                 0x11,  # header
@@ -83,10 +81,10 @@ class MessageServerValidInputTestCase(BaseTestCase):
 
 
 class MessageServerInvalidInputTestCase(BaseTestCase):
-    @gen_test
-    async def test_invalid_header(self):
-        client = await self.connect_messenger()
-        await client.write(
+    @safe_gen_test
+    def test_invalid_header(self):
+        client = yield self.connect_messenger()
+        yield client.write(
             bytes(
                 [
                     0x10,  # header
@@ -98,7 +96,7 @@ class MessageServerInvalidInputTestCase(BaseTestCase):
                 ]
             )
         )
-        result = await client.read_bytes(4)
+        result = yield client.read_bytes(4)
         self.assertEqual(
             result, bytes(
                 [
@@ -109,10 +107,10 @@ class MessageServerInvalidInputTestCase(BaseTestCase):
             )
         )
 
-    @gen_test
-    async def test_invalid_source_status(self):
-        client = await self.connect_messenger()
-        await client.write(
+    @safe_gen_test
+    def test_invalid_source_status(self):
+        client = yield self.connect_messenger()
+        yield client.write(
             bytes(
                 [
                     0x01,  # header
@@ -124,7 +122,7 @@ class MessageServerInvalidInputTestCase(BaseTestCase):
                 ]
             )
         )
-        result = await client.read_bytes(4)
+        result = yield client.read_bytes(4)
         self.assertEqual(
             result, bytes(
                 [
@@ -135,10 +133,10 @@ class MessageServerInvalidInputTestCase(BaseTestCase):
             )
         )
 
-    @gen_test
-    async def test_invalid_source_xor(self):
-        client = await self.connect_messenger()
-        await client.write(
+    @safe_gen_test
+    def test_invalid_source_xor(self):
+        client = yield self.connect_messenger()
+        yield client.write(
             bytes(
                 [
                     0x01,  # header
@@ -150,7 +148,7 @@ class MessageServerInvalidInputTestCase(BaseTestCase):
                 ]
             )
         )
-        result = await client.read_bytes(4)
+        result = yield client.read_bytes(4)
         self.assertEqual(
             result, bytes(
                 [

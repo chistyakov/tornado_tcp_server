@@ -1,6 +1,5 @@
 import logging
 
-from tornado.iostream import StreamClosedError
 from tornado.tcpserver import TCPServer
 
 from core.marshall import marshall_online_statistics
@@ -17,12 +16,8 @@ class ObserveServer(TCPServer):
 
     async def handle_stream(self, stream, address):
         await self.on_connect(stream)
-        while True:
-            try:
-                await stream.read_until_close()
-            except StreamClosedError:
-                await self.on_disconnect(stream)
-                break
+        await stream.read_until_close()
+        await self.on_disconnect(stream)
 
     async def on_connect(self, stream):
         await self.send_online_statistics(stream)
@@ -33,4 +28,4 @@ class ObserveServer(TCPServer):
             await stream.write(marshall_online_statistics(stat))
 
     async def on_disconnect(self, stream):
-        self.observers.pop(stream)
+        self.observers.remove(Observer(stream))
